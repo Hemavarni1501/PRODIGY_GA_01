@@ -1,5 +1,10 @@
 # GA_01: Intelligent Text Generation System
 
+
+## Live Deployment
+🔗 [View Live Application](https://appigyga01-qcfdbiztgvnxgnxyul38fk.streamlit.app/)
+
+
 ## Project Overview
 This repository contains a professional-grade text generation system built during my Generative AI Internship at Prodigy Infotech. The system leverages the **GPT-2 Large** (774M parameter) transformer architecture to generate coherent, technical, and contextually relevant text based on user input.
 
@@ -14,9 +19,6 @@ To ensure industry-ready output and mitigate common Large Language Model (LLM) i
 * **Model:** Hugging Face GPT-2 Large
 * **Frontend:** Streamlit (Minimalist UI)
 * **Environment:** GitHub Codespaces & Streamlit Cloud
-
-## Live Deployment
-🔗 [View Live Application](https://appigyga01-qcfdbiztgvnxgnxyul38fk.streamlit.app/)
 
 ## Setup Instructions
 1. Clone the repository: `git clone https://github.com/YOUR_USERNAME/PRODIGY_GA_01.git`
