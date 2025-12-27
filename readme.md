@@ -21,6 +21,6 @@ To ensure industry-ready output and mitigate common Large Language Model (LLM) i
 * **Environment:** GitHub Codespaces & Streamlit Cloud
 
 ## Setup Instructions
-1. Clone the repository: `git clone https://github.com/YOUR_USERNAME/PRODIGY_GA_01.git`
+1. Clone the repository: `git clone https://github.com/Hemavarni1501/PRODIGY_GA_01`
 2. Install dependencies: `pip install -r requirements.txt`
 3. Launch the app: `streamlit run app.py`
