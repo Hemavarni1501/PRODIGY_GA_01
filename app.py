@@ -2,91 +2,92 @@ import streamlit as st
 from transformers import GPT2LMHeadModel, GPT2Tokenizer
 import torch
 
-# Configuration - Corporate Branding
-st.set_page_config(page_title="Generative AI Systems | GA_01", layout="wide")
+# 1. Professional Page Config
+st.set_page_config(page_title="Generative AI System | GA_01", layout="wide")
 
-# Custom CSS for Industrial Aesthetic
+# 2. Optimized CSS for Professionalism and Visibility
+# Using secondaryBackgroundColor for the box so it adapts to Dark/Light mode automatically
 st.markdown("""
     <style>
-    .main { background-color: #ffffff; }
-    .stTextArea textarea { border: 1px solid #e0e0e0; font-family: 'Courier New', monospace; }
-    .stButton>button { 
-        background-color: #000000; color: white; border-radius: 0px; 
-        width: 100%; font-weight: bold; border: none; height: 3em;
+    /* Professional Sidebar & Buttons */
+    .stButton > button { 
+        width: 100%; font-weight: 600; height: 3em; 
+        border-radius: 4px; border: 1px solid #ccc;
     }
-    .stButton>button:hover { background-color: #333333; }
-    .output-card { 
-        background-color: #f9f9f9; padding: 30px; border-left: 10px solid #000; 
-        font-size: 1.1rem; line-height: 1.8; color: #333;
+    
+    /* The Output Box: Uses Streamlit's native background variable for visibility */
+    .output-container { 
+        padding: 20px; 
+        border-radius: 8px; 
+        border: 1px solid rgba(150, 150, 150, 0.2);
+        background-color: rgba(150, 150, 150, 0.1); /* Subtle adaptive background */
+        margin-bottom: 15px;
     }
-    header { visibility: hidden; }
+    
+    /* Ensure title is bold and clean */
+    h1 { font-family: 'Inter', sans-serif; font-weight: 800; }
     </style>
     """, unsafe_allow_html=True)
 
 @st.cache_resource
-def initialize_engine():
-    # Large model provides the best logic-to-size ratio for portfolios
-    model_name = "gpt2-large"
+def load_engine():
+    # Small model for stability on Streamlit Cloud
+    model_name = "gpt2"
     tokenizer = GPT2Tokenizer.from_pretrained(model_name)
     model = GPT2LMHeadModel.from_pretrained(model_name)
     return tokenizer, model
 
-def generate_technical_sequence(prompt, length, temp, top_p):
-    tokenizer, model = initialize_engine()
-    
-    # SYSTEM ANCHOR: We force the model to start with a factual definition 
-    # This prevents the "autocomplete random website" behavior.
-    anchor = f"Technical definition of {prompt}: {prompt} is defined as"
-    
+def run_generation(topic, length, temp):
+    tokenizer, model = load_engine()
+    # Technical Anchor for better output
+    anchor = f"Technical summary of {topic}: {topic} is defined as"
     inputs = tokenizer.encode(anchor, return_tensors="pt")
     
-    with torch.no_grad():
-        outputs = model.generate(
-            inputs,
-            max_new_tokens=length,
-            temperature=temp,
-            top_p=top_p,
-            do_sample=True,
-            # Contrastive Search parameters
-            repetition_penalty=1.5,
-            no_repeat_ngram_size=3,
-            pad_token_id=tokenizer.eos_token_id
-        )
+    outputs = model.generate(
+        inputs,
+        max_new_tokens=length,
+        temperature=temp,
+        do_sample=True,
+        repetition_penalty=1.2,
+        pad_token_id=tokenizer.eos_token_id
+    )
     
-    raw_output = tokenizer.decode(outputs[0], skip_special_tokens=True)
-    
-    # GUARDRAIL: Cut off if the model drifts into web links or irrelevant metadata
-    clean_output = raw_output.replace(anchor, f"{prompt} is defined as")
-    if "http" in clean_output:
-        clean_output = clean_output.split("http")[0]
-    if "\n" in clean_output:
-        clean_output = clean_output.split("\n\n")[0]
-        
-    return clean_output.strip()
+    response = tokenizer.decode(outputs[0], skip_special_tokens=True)
+    return response.replace(f"Technical summary of {topic}: ", "").strip()
 
-# --- SIDEBAR (TECHNICAL CONTROLS) ---
-st.sidebar.title("System Parameters")
-st.sidebar.markdown("Stochastic configuration for the inference engine.")
-token_limit = st.sidebar.slider("Maximum Sequence Length", 50, 300, 150)
-temperature = st.sidebar.slider("Sampling Temperature", 0.1, 1.0, 0.5)
-top_p_val = st.sidebar.slider("Nucleus Sampling (Top-P)", 0.5, 1.0, 0.9)
-
-# --- MAIN UI ---
+# --- MAIN INTERFACE ---
 st.title("Generative AI System Architecture")
-st.text("TRACK: GA | TASK: 01 | INTERN: PRODIGY_INFOTECH")
+st.caption("TRACK: GA | TASK: 01 | PRODIGY INFOTECH INTERNSHIP")
 st.markdown("---")
 
-user_input = st.text_input("Enter Subject Matter", placeholder="e.g. Neural Networks, Quantum Computing")
+# Layout: 2 Columns
+col1, col2 = st.columns([1, 2], gap="large")
 
-if st.button("EXECUTE INFERENCE"):
-    if user_input:
-        with st.status("Initializing engine...", expanded=False) as status:
-            result = generate_technical_sequence(user_input, token_limit, temperature, top_p_val)
-            status.update(label="Inference complete.", state="complete")
+with col1:
+    st.subheader("System Parameters")
+    subject = st.text_input("Enter Subject", placeholder="e.g. Virtualization")
+    token_limit = st.slider("Max Length", 50, 200, 100)
+    temp_val = st.slider("Temperature", 0.1, 1.0, 0.7)
+    if st.button("RUN INFERENCE"):
+        if subject:
+            with st.spinner("Processing..."):
+                st.session_state.result = run_generation(subject, token_limit, temp_val)
+        else:
+            st.error("Please enter a subject.")
+
+with col2:
+    st.subheader("Neural Output")
+    if 'result' in st.session_state:
+        # DISPLAY AREA: Plain st.write or st.info is often more visible than custom HTML
+        # But here is a styled box that ADAPTS to dark/light mode
+        st.info(st.session_state.result)
         
-        st.markdown("### Generated Output")
-        st.markdown(f'<div class="output-card">{result}</div>', unsafe_allow_html=True)
-        
-        st.download_button("Export Transcript", result, file_name="ga_01_result.txt")
+        # Download Action
+        st.download_button(
+            label="Download Log",
+            data=st.session_state.result,
+            file_name="ga_01_output.txt",
+            mime="text/plain"
+        )
     else:
-        st.error("Error: Null input detected. Please enter a subject.")
+        st.markdown("*Awaiting system input...*")
